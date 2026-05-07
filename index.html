@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0, maximum-scale=5.0">
+<title>再生花 Rebirthflower</title>
+<style>
+  /* ── Reset & Base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    font-family: 'Helvetica Neue', Helvetica, 'Noto Sans TC', 'Noto Sans JP', 'Noto Sans KR', sans-serif;
+    background: #faf9f7;
+    color: #2d2d2d;
+    max-width: 375px;
+    margin: 0 auto;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  /* ── Lang Bar ── */
+  .lang-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .lang-btn {
+    border: 1.5px solid #ddd;
+    background: #fff;
+    color: #555;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+  }
+  .lang-btn.active {
+    background: #B22222;
+    border-color: #B22222;
+    color: #fff;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(160deg, #B22222 0%, #7a1313 100%);
+    color: #fff;
+    padding: 32px 20px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40' fill='%23ffffff' fill-opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+  .hero-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: 3px solid rgba(255,255,255,0.3);
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    backdrop-filter: blur(4px);
+  }
+  .hero-name {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+  }
+  .hero-name-sub {
+    font-size: 13px;
+    opacity: 0.75;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .hero-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+  }
+  .hero-info-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    opacity: 0.88;
+  }
+  .hero-info-row svg { flex-shrink: 0; }
+
+  /* ── Category Tabs ── */
+  .cat-tabs {
+    position: sticky;
+    top: 45px;
+    z-index: 90;
+    background: #fff;
+    border-bottom: 2px solid #f0eeeb;
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 0 8px;
+  }
+  .cat-tabs::-webkit-scrollbar { display: none; }
+  .cat-tab {
+    flex-shrink: 0;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #888;
+    cursor: pointer;
+    border-bottom: 2.5px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.18s;
+    white-space: nowrap;
+  }
+  .cat-tab.active {
+    color: #B22222;
+    border-bottom-color: #B22222;
+  }
+
+  /* ── Menu Section ── */
+  .menu-section { padding: 0 0 8px; }
+  .section-header {
+    padding: 20px 16px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #B22222;
+    border-bottom: 1px solid #f0eeeb;
+    margin-bottom: 4px;
+  }
+
+  /* ── Item Card ── */
+  .item-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: #fff;
+    border-bottom: 1px solid #f5f3f0;
+    cursor: pointer;
+    transition: background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .item-card:active { background: #fdf5f5; }
+  .item-thumb {
+    width: 72px;
+    height: 72px;
+    border-radius: 12px;
+    background: #f5f3f0;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    overflow: hidden;
+  }
+  .item-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+  .item-body { flex: 1; min-width: 0; }
+  .item-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  .item-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+  .tag-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 10px;
+    background: #f5f3f0;
+    color: #555;
+    white-space: nowrap;
+  }
+  .tag-badge.tag-R  { background: #fff3cd; color: #8a6000; }
+  .tag-badge.tag-V  { background: #e8f5e9; color: #2e7d32; }
+  .tag-badge.tag-V5 { background: #f3e8ff; color: #6b21a8; }
+  .tag-badge.tag-P  { background: #fce4ec; color: #c62828; }
+  .tag-badge.tag-B  { background: #fff8e1; color: #e65100; }
+  .tag-badge.tag-L  { background: #f9fbe7; color: #558b2f; }
+  .tag-badge.tag-1  { background: #fff3e0; color: #bf360c; }
+  .tag-badge.tag-2  { background: #fbe9e7; color: #b71c1c; }
+  .tag-badge.tag-3  { background: #fce4ec; color: #880e4f; }
+  .tag-badge.tag-H  { background: #e0f2f1; color: #00695c; }
+
+  .item-price {
+    font-size: 14px;
+    font-weight: 700;
+    color: #B22222;
+  }
+  .item-price-multi { display: flex; flex-direction: column; gap: 2px; }
+  .item-price-row { font-size: 12px; font-weight: 600; color: #B22222; }
+  .item-price-row .price-label { color: #888; font-weight: 400; margin-right: 4px; }
+  .item-note {
+    font-size: 11px;
+    color: #999;
+    margin-top: 3px;
+    line-height: 1.4;
+  }
+
+  /* ── Modal Overlay ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 200;
+    display: flex;
+    align-items: flex-end;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .modal-sheet {
+    width: 100%;
+    max-width: 375px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 20px 20px 0 0;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    -webkit-overflow-scrolling: touch;
+  }
+  .modal-overlay.open .modal-sheet {
+    transform: translateY(0);
+  }
+  .modal-handle {
+    width: 36px;
+    height: 4px;
+    background: #ddd;
+    border-radius: 2px;
+    margin: 12px auto 0;
+  }
+  .modal-close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.08);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #555;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .modal-body { padding: 16px 20px 40px; position: relative; }
+  .modal-img {
+    width: 100%;
+    height: 200px;
+    background: #f5f3f0;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 72px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .modal-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 14px;
+    touch-action: pinch-zoom;
+  }
+  .modal-name {
+    font-size: 22px;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+  .modal-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+  .modal-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #B22222;
+    margin-bottom: 12px;
+  }
+  .modal-price-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+  .modal-price-table td {
+    padding: 6px 0;
+    font-size: 14px;
+    border-bottom: 1px solid #f0eeeb;
+  }
+  .modal-price-table td:first-child { color: #666; }
+  .modal-price-table td:last-child { text-align: right; font-weight: 700; color: #B22222; }
+  .modal-desc, .modal-note {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.7;
+    padding: 10px 12px;
+    background: #faf9f7;
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+  .modal-note { border-left: 3px solid #B22222; }
+  .modal-divider {
+    height: 1px;
+    background: #f0eeeb;
+    margin: 14px 0;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    padding: 24px 16px 40px;
+    font-size: 11px;
+    color: #bbb;
+    line-height: 1.8;
+  }
+  .footer strong { color: #888; }
+
+  /* ── Utility ── */
+  [data-lang] { display: none; }
+</style>
+</head>
+<body>
+
+<!-- Lang Bar -->
+<div class="lang-bar">
+  <button class="lang-btn active" onclick="setLang('zh')">繁中</button>
+  <button class="lang-btn" onclick="setLang('en')">EN</button>
+  <button class="lang-btn" onclick="setLang('ja')">日本語</button>
+  <button class="lang-btn" onclick="setLang('ko')">한국어</button>
+</div>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-img">🌸</div>
+  <div class="hero-name" id="hero-name">再生花</div>
+  <div class="hero-name-sub">Rebirthflower</div>
+  <div class="hero-info">
+    <div class="hero-info-row">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span id="hero-address"></span>
+    </div>
+    <div class="hero-info-row">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.49 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.4 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.7a16 16 0 0 0 7.39 7.39l.79-.79a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      <span>089-881-589</span>
+    </div>
+  </div>
+</div>
+
+<!-- Category Tabs -->
+<div class="cat-tabs" id="cat-tabs"></div>
+
+<!-- Menu Content -->
+<div id="menu-content"></div>
+
+<!-- Footer -->
+<div class="footer">
+  <span id="footer-text"></span>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal-sheet" id="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-body" id="modal-body">
+      <button class="modal-close-btn" onclick="closeModalDirect()">✕</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Data ──
+const store = {
+  name: { zh: '再生花', en: 'Rebirthflower', ja: '再生花', ko: '재생화' },
+  address: {
+    zh: '樟原16-7號',
+    en: '16-7 Zhangyuan',
+    ja: '樟原16-7号',
+    ko: '장위안 16-7호',
+  },
+};
+
+const categories = {
+  main:  { zh: '主餐類', en: 'Mains',  ja: 'メインディッシュ', ko: '메인요리' },
+  salad: { zh: '沙拉類', en: 'Salads', ja: 'サラダ',           ko: '샐러드'  },
+};
+
+const tagMeta = {
+  R:  { icon: '⭐',     zh: '本店推薦', en: 'Recommended',            ja: 'おすすめ',       ko: '추천' },
+  1:  { icon: '🌶️',   zh: '小辣',     en: 'Mild Spicy',              ja: '少し辛い',        ko: '약간 매운' },
+  2:  { icon: '🌶️🌶️', zh: '中辣',   en: 'Medium Spicy',            ja: '中辛',            ko: '보통 매운' },
+  3:  { icon: '🔥',    zh: '大辣',     en: 'Very Spicy',              ja: '激辛',            ko: '매우 매운' },
+  P:  { icon: '🐷',    zh: '含豬肉',   en: 'Contains Pork',           ja: '豚肉入り',        ko: '돼지고기 포함' },
+  B:  { icon: '🐂',    zh: '含牛肉',   en: 'Contains Beef',           ja: '牛肉入り',        ko: '소고기 포함' },
+  L:  { icon: '🐑',    zh: '含羊肉',   en: 'Contains Lamb',           ja: 'ラム入り',        ko: '양고기 포함' },
+  V:  { icon: '🥬',    zh: '素食',     en: 'Vegetarian',              ja: 'ベジタリアン',    ko: '채식' },
+  V5: { icon: '🧄',    zh: '五辛素',   en: 'Plant-based with Allium', ja: '五葷あり精進',    ko: '오신채 포함 채식' },
+  H:  { icon: '☪️',   zh: '清真認證', en: 'Halal Certified',         ja: 'ハラール認証',    ko: '할랄 인증' },
+};
+
+const footerI18n = {
+  zh: '價格含稅 · 如有過敏請告知服務人員',
+  en: 'Prices include tax · Please inform staff of any allergies',
+  ja: '価格は税込み · アレルギーがある場合はスタッフにお知らせください',
+  ko: '가격 세금 포함 · 알레르기가 있으면 직원에게 알려주세요',
+};
+
+const marketI18n = { zh: '時價', en: 'Market Price', ja: '時価', ko: '시가' };
+
+const menuItems = [
+  {
+    id: 'main-001', category: 'main',
+    names: { zh: '猴頭菇漢堡', en: 'Hericium Mushroom Burger', ja: '猿頭キノコバーガー', ko: '원숭이머리버섯 버거' },
+    price: [{ label: null, value: 280 }],
+    image: null, emoji: '🍔', tags: ['V'],
+    desc: { zh: '', en: '', ja: '', ko: '' },
+    note: { zh: '蛋奶素', en: 'Ovo-Vegetarian', ja: '卵・乳製品可の精進料理', ko: '달걀·유제품 포함 채식' },
+  },
+  {
+    id: 'main-002', category: 'main',
+    names: { zh: '雙層超司豬肉堡', en: 'Double Cheese Pork Burger', ja: 'ダブルチーズポークバーガー', ko: '더블 치즈 돼지고기 버거' },
+    price: [{ label: null, value: 330 }],
+    image: null, emoji: '🍔', tags: ['P'],
+    desc: { zh: '', en: '', ja: '', ko: '' },
+    note: { zh: '', en: '', ja: '', ko: '' },
+  },
+  {
+    id: 'main-003', category: 'main',
+    names: { zh: '雙層超司牛肉堡', en: 'Double Cheese Beef Burger', ja: 'ダブルチーズビーフバーガー', ko: '더블 치즈 소고기 버거' },
+    price: [{ label: null, value: 350 }],
+    image: null, emoji: '🍔', tags: ['B'],
+    desc: { zh: '', en: '', ja: '', ko: '' },
+    note: { zh: '', en: '', ja: '', ko: '' },
+  },
+  {
+    id: 'main-004', category: 'main',
+    names: { zh: '煙燻培根帕尼尼', en: 'Smoked Bacon Panini', ja: 'スモークベーコンパニーニ', ko: '훈제 베이컨 파니니' },
+    price: [{ label: null, value: 330 }],
+    image: null, emoji: '🥪', tags: ['P'],
+    desc: { zh: '', en: '', ja: '', ko: '' },
+    note: { zh: '', en: '', ja: '', ko: '' },
+  },
+  {
+    id: 'main-005', category: 'main',
+    names: { zh: '鮭魚煙燻帕尼尼', en: 'Smoked Salmon Panini', ja: 'スモークサーモンパニーニ', ko: '훈제 연어 파니니' },
+    price: [{ label: null, value: 350 }],
+    image: null, emoji: '🥪', tags: [],
+    desc: { zh: '', en: '', ja: '', ko: '' },
+    note: {
+      zh: '煙燻鮭魚一片，長時低溫烘烤保留最佳口感',
+      en: 'One slice of smoked salmon, slow-roasted at low temperature to retain the best taste.',
+      ja: 'スモークサーモン一枚、低温でじっくり焼き上げ最高の風味を引き出しました。',
+      ko: '훈제 연어 한 장, 저온에서 천천히 구워 최상의 맛을 살렸습니다.',
+    },
+  },
+  {
+    id: 'salad-001', category: 'salad',
+    names: { zh: '鮮蝦蔬果沙拉', en: 'Shrimp & Vegetable Salad', ja: '海老と野菜のサラダ', ko: '새우 채소 샐러드' },
+    price: [{ label: null, value: 150 }],
+    image: null, emoji: '🥗', tags: [],
+    desc: { zh: '', en: '', ja: '', ko: '' },
+    note: { zh: '', en: '', ja: '', ko: '' },
+  },
+  {
+    id: 'salad-002', category: 'salad',
+    names: { zh: '雞胸蔬果沙拉', en: 'Chicken Breast Salad', ja: '鶏むね肉と野菜のサラダ', ko: '닭가슴살 채소 샐러드' },
+    price: [{ label: null, value: 150 }],
+    image: null, emoji: '🥗', tags: [],
+    desc: { zh: '', en: '', ja: '', ko: '' },
+    note: { zh: '', en: '', ja: '', ko: '' },
+  },
+  {
+    id: 'salad-003', category: 'salad',
+    names: { zh: '田園蔬果沙拉', en: 'Garden Vegetable Salad', ja: 'ガーデンサラダ', ko: '가든 채소 샐러드' },
+    price: [{ label: null, value: 150 }],
+    image: null, emoji: '🥗', tags: ['V'],
+    desc: { zh: '', en: '', ja: '', ko: '' },
+    note: { zh: '', en: '', ja: '', ko: '' },
+  },
+  {
+    id: 'salad-004', category: 'salad',
+    names: { zh: '豪華海陸拼盤', en: 'Deluxe Sea & Land Platter', ja: '豪華シーフード＆ミートプラッター', ko: '고급 해산물&육류 플래터' },
+    price: [{ label: null, value: 150 }],
+    image: null, emoji: '🍱', tags: [],
+    desc: { zh: '', en: '', ja: '', ko: '' },
+    note: { zh: '', en: '', ja: '', ko: '' },
+  },
+  {
+    id: 'salad-005', category: 'salad',
+    names: { zh: '炸物拼盤', en: 'Fried Food Platter', ja: '揚げ物盛り合わせ', ko: '튀김 모둠' },
+    price: [{ label: null, value: 150 }],
+    image: null, emoji: '🍟', tags: [],
+    desc: { zh: '', en: '', ja: '', ko: '' },
+    note: { zh: '', en: '', ja: '', ko: '' },
+  },
+  {
+    id: 'salad-006', category: 'salad',
+    names: { zh: '歡樂兒童餐', en: "Happy Children's Meal", ja: 'キッズメニュー', ko: '어린이 세트' },
+    price: [{ label: null, value: 150 }],
+    image: null, emoji: '🍱', tags: [],
+    desc: { zh: '', en: '', ja: '', ko: '' },
+    note: { zh: '', en: '', ja: '', ko: '' },
+  },
+  {
+    id: 'salad-007', category: 'salad',
+    names: { zh: '南瓜濃湯', en: 'Pumpkin Cream Soup', ja: 'かぼちゃのポタージュ', ko: '단호박 크림수프' },
+    price: [{ label: null, value: 150 }],
+    image: null, emoji: '🎃', tags: ['V'],
+    desc: { zh: '', en: '', ja: '', ko: '' },
+    note: { zh: '', en: '', ja: '', ko: '' },
+  },
+  {
+    id: 'salad-008', category: 'salad',
+    names: { zh: '干貝蒸蛋', en: 'Dried Scallop Steamed Egg', ja: '干し貝柱の茶碗蒸し', ko: '건관자 계란찜' },
+    price: [{ label: null, value: 150 }],
+    image: null, emoji: '🥚', tags: [],
+    desc: { zh: '', en: '', ja: '', ko: '' },
+    note: { zh: '', en: '', ja: '', ko: '' },
+  },
+];
+
+// ── State ──
+let currentLang = 'zh';
+let savedScrollY = 0;
+
+// ── Helpers ──
+function renderTagBadge(code, lang) {
+  const t = tagMeta[code];
+  if (!t) return '';
+  return `<span class="tag-badge tag-${code}">${t.icon} ${t[lang]}</span>`;
+}
+
+// ── Build DOM ──
+function buildMenu() {
+  // Tabs
+  const tabsEl = document.getElementById('cat-tabs');
+  const catKeys = [...new Set(menuItems.map(i => i.category))];
+  tabsEl.innerHTML = catKeys.map((k, idx) =>
+    `<div class="cat-tab${idx === 0 ? ' active' : ''}" data-cat="${k}" onclick="scrollToSection('${k}', this)">${categories[k][currentLang]}</div>`
+  ).join('');
+
+  // Content
+  const contentEl = document.getElementById('menu-content');
+  contentEl.innerHTML = catKeys.map(cat => {
+    const items = menuItems.filter(i => i.category === cat);
+    const cards = items.map(item => {
+      const hasTags = item.tags.length > 0;
+      const hasNote = item.note[currentLang] !== '';
+      const multiPrice = item.price.length > 1;
+
+      const thumbHtml = item.image
+        ? `<img src="images/${item.image}" alt="${item.names[currentLang]}" loading="lazy">`
+        : item.emoji;
+
+      const tagsHtml = hasTags
+        ? `<div class="item-tags">${item.tags.map(t => renderTagBadge(t, currentLang)).join('')}</div>`
+        : '';
+
+      const priceHtml = multiPrice
+        ? `<div class="item-price-multi">${item.price.map(p => {
+            const v = p.value === 'market' ? marketI18n[currentLang] : `NT$${p.value}`;
+            return `<div class="item-price-row">${p.label ? `<span class="price-label">${p.label[currentLang]}</span>` : ''}${v}</div>`;
+          }).join('')}</div>`
+        : `<div class="item-price">${item.price[0].value === 'market' ? marketI18n[currentLang] : 'NT$' + item.price[0].value}</div>`;
+
+      const noteHtml = hasNote
+        ? `<div class="item-note">${item.note[currentLang]}</div>`
+        : '';
+
+      return `<div class="item-card" onclick="openModal('${item.id}')">
+        <div class="item-thumb">${thumbHtml}</div>
+        <div class="item-body">
+          <div class="item-name">${item.names[currentLang]}</div>
+          ${tagsHtml}
+          ${priceHtml}
+          ${noteHtml}
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div class="menu-section" id="section-${cat}">
+      <div class="section-header">${categories[cat][currentLang]}</div>
+      ${cards}
+    </div>`;
+  }).join('');
+
+  // Footer
+  document.getElementById('footer-text').textContent = footerI18n[currentLang];
+  // Hero address
+  document.getElementById('hero-address').textContent = store.address[currentLang];
+  // Hero name
+  document.getElementById('hero-name').textContent = store.name[currentLang];
+}
+
+// ── Lang Switch ──
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.lang-btn[onclick="setLang('${lang}')"]`).classList.add('active');
+  buildMenu();
+  const firstTab = document.querySelector('.cat-tab');
+  if (firstTab) firstTab.classList.add('active');
+}
+
+// ── Category Scroll ──
+function scrollToSection(cat, tabEl) {
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  const target = document.getElementById('section-' + cat);
+  if (target) {
+    const offset = target.getBoundingClientRect().top + window.scrollY - 90;
+    window.scrollTo({ top: offset, behavior: 'smooth' });
+  }
+}
+
+// Tab highlight on scroll
+window.addEventListener('scroll', () => {
+  const catKeys = [...new Set(menuItems.map(i => i.category))];
+  let active = catKeys[0];
+  for (const cat of catKeys) {
+    const el = document.getElementById('section-' + cat);
+    if (el && el.getBoundingClientRect().top <= 100) active = cat;
+  }
+  document.querySelectorAll('.cat-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.cat === active);
+  });
+}, { passive: true });
+
+// ── Modal ──
+function openModal(id) {
+  savedScrollY = window.scrollY;
+  const item = menuItems.find(i => i.id === id);
+  if (!item) return;
+  const lang = currentLang;
+
+  const thumbHtml = item.image
+    ? `<img src="images/${item.image}" alt="${item.names[lang]}" style="touch-action:pinch-zoom">`
+    : item.emoji;
+
+  const tagsHtml = item.tags.length
+    ? `<div class="modal-tags">${item.tags.map(t => renderTagBadge(t, lang)).join('')}</div>`
+    : '';
+
+  let priceHtml = '';
+  if (item.price.length === 1 && item.price[0].label === null) {
+    const v = item.price[0].value === 'market' ? marketI18n[lang] : `NT$${item.price[0].value}`;
+    priceHtml = `<div class="modal-price">${v}</div>`;
+  } else {
+    const rows = item.price.map(p => {
+      const v = p.value === 'market' ? marketI18n[lang] : `NT$${p.value}`;
+      const lbl = p.label ? p.label[lang] : '';
+      return `<tr><td>${lbl}</td><td>${v}</td></tr>`;
+    }).join('');
+    priceHtml = `<table class="modal-price-table"><tbody>${rows}</tbody></table>`;
+  }
+
+  const descHtml = item.desc[lang]
+    ? `<div class="modal-desc">${item.desc[lang]}</div>`
+    : '';
+  const noteHtml = item.note[lang]
+    ? `<div class="modal-note">${item.note[lang]}</div>`
+    : '';
+
+  document.getElementById('modal-body').innerHTML = `
+    <button class="modal-close-btn" onclick="closeModalDirect()">✕</button>
+    <div class="modal-img">${thumbHtml}</div>
+    <div class="modal-name">${item.names[lang]}</div>
+    ${tagsHtml}
+    <div class="modal-divider"></div>
+    ${priceHtml}
+    ${descHtml}
+    ${noteHtml}
+  `;
+
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModalDirect();
+}
+
+function closeModalDirect() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  window.scrollTo({ top: savedScrollY });
+}
+
+// ── Init ──
+buildMenu();
+</script>
+</body>
+</html>
